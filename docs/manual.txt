@@ -1,0 +1,27 @@
+Two systems of electricty
+	-can't conect them improperly
+	-Connect Red to Red
+		
+	Connect 12 Volts first
+	Connect 6 Volts second
+	
+	Three Swtiches
+		Main
+			1 = on
+			0 = off
+		Multiplexer
+			- On the right side
+			- Pilot can turn it on
+		Screen
+			- Pilot needs to turn this on
+			- IF it says no signal, turn on the multiplexer
+			
+	Make sure all batteries are disconnected before doing anything with the Arduino
+	
+	Wings
+		-They don't work unless both batteries are connected.
+		
+	POST
+		-Check each component to see if it's moving
+		-Check to see if components are overheating
+		
