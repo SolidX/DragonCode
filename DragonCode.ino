@@ -1,5 +1,5 @@
 #include <Servo.h>
-#include <Math.h> 
+#include <Math.h>
 
 //PART  			-- Port #
 //
@@ -8,17 +8,20 @@
 //Eyes				-- Digital 7
 //Left Arm			-- Digital 12
 //Left Hand			-- Digital 13
-//Right Arm			-- Digital 1
+//Right Arm			-- Digital 3
 //Right Hand		-- Digital 0
-//Power Down Button	--  S2 pin 6
+//Power Down Button	--  S2 pin 6 <---DISABLED
+//PIN 1 IS BROKEN !!!!!!!
 
 //Head Servos
 Servo eyes;
 Servo mouthServo;
 
 //Arm Servos
-Servo leftArm, leftHand;
-Servo rightArm, rightHand;
+Servo leftArm; 
+Servo leftHand;
+Servo rightArm; 
+Servo rightHand;
  
 int pos = 0;		// variable to store the servo position 
 int potpin = 0;		// analog pin used to connect the potentiometer
@@ -31,6 +34,16 @@ int thirdCounter = 0;
 int armMoveUp = 160;		//douche code
 int armMoveDown = 120;
 
+int raInnerCount = 0;
+int raStateCount = 0;
+int rHInnerCount = 0;
+int rHStateCount = 0;
+int lHInnerCount = 0;
+int lHStateCount = 0;
+
+int stopCounter = 100;
+boolean stopped = false;
+
 boolean powerOn;
 int key_s6; 
 
@@ -42,9 +55,9 @@ void setup()
 
 	//Arm Stuff
 	leftArm.attach(12);		//Left Arm Elbow
-	leftHand.attach(13);	//Left Hand Fingers (180 is open, 90 is closed gripped)
-	rightArm.attach(1);		//Right Arm Elbow
-	rightHand.attach(0);	//Right Hand FIngers (180 is open, 90 is closed gripped)
+//	leftHand.attach(13);	//Left Hand Fingers (180 is open, 90 is closed gripped)
+	rightArm.attach(3);		//Right Arm Elbow
+//	rightHand.attach(0);	//Right Hand FIngers (180 is open, 90 is closed gripped)
 
 	counter = 0;
 	key_s6 = 2;
@@ -55,7 +68,6 @@ void setup()
 
 void jawCode(int minJawOp, int maxJawOp)
 {
-	//TODO: Throw error minJawOp < maxJawOp <--- there are no exceptions...
 	//if (minJawOp >= maxJawOp)	return;	//A silent-fail solution
 
 	int val = analogRead(potpin);		// reads the value of the potentiometer (value between 0 and 1023)
@@ -66,17 +78,17 @@ void jawCode(int minJawOp, int maxJawOp)
 
 	if (val <= maxJawOp && val >= minJawOp)
 		mouthServo.write(val);			// sets the servo position according to the scaled value
-	//Serial.print();
 }
+
 
 void writeToServo(Servo &servoName, int count, boolean invert)
 {
-	Serial.print("Location: ");
-	Serial.println(count);
+	//Serial.print("Location: ");
+	//Serial.println(count);
 	if (invert)
-		servoName.write(count);
-	else
 		servoName.write(invertServoPosition(count));
+	else
+		servoName.write(count);
 } 
 
 void movement(Servo &servoItem, boolean invert, int &state, int moveSpeed, int startPos, int endPos, int &innerCounter, int timeDelay, int timeDelay2, int moveSpeedTwo)
@@ -140,57 +152,9 @@ void movement(Servo &servoItem, boolean invert, int &state, int moveSpeed, int s
 	}
 }
 
-int raInnerCount = 0;
-int raStateCount = 0;
-int rHInnerCount = 0;
-int rHStateCount = 0;
-int lHInnerCount = 0;
-int lHStateCount = 0;
-
-int stopCounter = 100;
-
 void loop()
-{
-	boolean stopped = false;
-  
-	if(digitalRead(key_s6) == 0)
-	powerOn = !powerOn;
-
-	if (powerOn)
-	{
-		//mouth close, mouth open                  
-		jawCode(invertServoPosition(155) + 5, invertServoPosition(100));
-		//Eyes
-		movement(eyes, false, stateOne, 10, 0, 43, secondCounter, 1000, 100, 10);
-		//Arms
-		//TODO: Check the arm drop
-		movement(leftArm, false, stateTwo, 2, armMoveDown, armMoveUp, thirdCounter, 3000, 3000, 10);
-		//	movement(leftArm, false, stateTwo, 2, 100, 120, thirdCounter, 3000, 3000, 10);
-		//movement(rightArm, true, raStateCount, 2, 100, 140, raInnerCount, 3000, 3000, 10);
-
-		if(stateTwo == 0 && thirdCounter == 0)
-		{
-			armMoveUp = random(140, 160);
-			armMoveDown = random(135, 145);
-		}
-	
-		//Hands
-		//TODO: Finish the hands.
-		movement(leftHand, true, lHStateCount, 2, 90, 180, lHInnerCount, 3000, 3000, 10);
-		movement(rightHand, true, rHStateCount, 2, 90, 180, rHInnerCount, 3000, 3000, 10);
-	
-		delay(1);
-		counter++;
-	}
-	else
-	{
-		//Lower limbs to safe position & give 30 secs to unplug power.
-		if (!stopped)
-		{
-			powerDown(stopCounter);
-			//stopped = true;
-		}
-	}
+{ 
+	thatShitWeNormallyDo();
 }
 
 int invertServoPosition(int pos)
@@ -198,17 +162,30 @@ int invertServoPosition(int pos)
 	return abs(180 - pos);
 }
 
-void powerDown(int &pos)
+void thatShitThatWeNormallyDo()
 {
-	//TODO: do something about magic numbers
-	leftHand.write(90);
-	rightHand.write(90);
-  
-	if(pos < 150)
+	//mouth close, mouth open                  
+	jawCode(invertServoPosition(155) + 5, invertServoPosition(100));
+	
+	//Eyes
+	//movement(eyes, false, stateOne, 10, 0, 43, secondCounter, 1000, 100, 10);
+	
+	//Arms
+	//movement(leftArm, false, stateTwo, 2, armMoveDown, armMoveUp, thirdCounter, 3000, 3000, 10);
+	//movement(leftArm, false, stateTwo, 2, -60, 20, thirdCounter, 3000, 3000, 10);
+	movement(rightArm, false, raStateCount, 2, 20, 70, raInnerCount, 3000, 3000, 10);
+
+	if(stateTwo == 0 && thirdCounter == 0)
 	{
-		leftArm.write(pos);
-		rightArm.write(invertServoPosition(pos));
-		pos++;
-		delay(20);
+		armMoveUp = random(55, 70);
+		armMoveDown = random(20, 35);
 	}
+
+	//Hands
+	//TODO: Finish the hands.
+	//movement(leftHand, true, lHStateCount, 2, 90, 180, lHInnerCount, 3000, 3000, 10);
+	//movement(rightHand, true, rHStateCount, 2, 90, 180, rHInnerCount, 3000, 3000, 10);
+
+	delay(1);
+	counter++;
 }
