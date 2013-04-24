@@ -23,8 +23,8 @@ Servo leftHand;
 Servo rightArm; 
 Servo rightHand;
  
-int pos = 0;		// variable to store the servo position 
-int potpin = 0;		// analog pin used to connect the potentiometer
+short pos = 0;		// variable to store the servo position 
+const short potpin = 0;	// analog pin used to connect the potentiometer
 long counter;
 
 int stateOne = 0;
@@ -41,11 +41,7 @@ int rHStateCount = 0;
 int lHInnerCount = 0;
 int lHStateCount = 0;
 
-int stopCounter = 100;
-boolean stopped = false;
-
-boolean powerOn;
-int key_s6; 
+const boolean debug = false;
 
 void setup() 
 {
@@ -60,10 +56,9 @@ void setup()
 //	rightHand.attach(0);	//Right Hand FIngers (180 is open, 90 is closed gripped)
 
 	counter = 0;
-	key_s6 = 2;
-	Serial.begin(9600);
-	powerOn = true;
-	pinMode(key_s6, INPUT);
+	
+	if (debug)
+		Serial.begin(9600);
 } 
 
 void jawCode(int minJawOp, int maxJawOp)
@@ -83,8 +78,12 @@ void jawCode(int minJawOp, int maxJawOp)
 
 void writeToServo(Servo &servoName, int count, boolean invert)
 {
-	//Serial.print("Location: ");
-	//Serial.println(count);
+	if (debug)
+	{
+		Serial.print("writeToServo Location: ");
+		Serial.println(count);
+	}
+	
 	if (invert)
 		servoName.write(invertServoPosition(count));
 	else
@@ -93,27 +92,33 @@ void writeToServo(Servo &servoName, int count, boolean invert)
 
 void movement(Servo &servoItem, boolean invert, int &state, int moveSpeed, int startPos, int endPos, int &innerCounter, int timeDelay, int timeDelay2, int moveSpeedTwo)
 {
-	//Serial.print("State = ");
-	//Serial.println(state);
+	if (debug)
+	{
+		Serial.print("movement State = ");
+		Serial.println(state);
+	}
+	
 	switch (state)
 	{
 		case 0:
 			//start state moving from beginner position
-			if(counter%moveSpeed == 0)
+			if (counter%moveSpeed == 0)
 			{
 				writeToServo(servoItem, (startPos+innerCounter), invert);
 				innerCounter = innerCounter + 1;
 			}
-			if((startPos + innerCounter) >= endPos)
+			if (startPos + innerCounter >= endPos)
 			{
-				//Serial.println("startPos + innerCounter = endPos");
+				if (debug)
+					Serial.println("startPos + innerCounter = endPos");
+
 				state = 1;
 				innerCounter = 0;
 			}
 			break;
 		case 1:
 			//the first delay
-			if( innerCounter < timeDelay)
+			if (innerCounter < timeDelay)
 			{
 				innerCounter++;
 			}
@@ -125,12 +130,12 @@ void movement(Servo &servoItem, boolean invert, int &state, int moveSpeed, int s
 			break;
 		case 2:
 			//move back
-			if((counter%moveSpeedTwo) == 0)
+			if (counter % moveSpeedTwo == 0)
 			{		
 				writeToServo(servoItem, (endPos - innerCounter), invert);
 				innerCounter++;
 			}
-			if((endPos - innerCounter) <= startPos)
+			if (endPos - innerCounter <= startPos)
 			{
 				state = 3;
 				innerCounter = 0;
@@ -154,7 +159,7 @@ void movement(Servo &servoItem, boolean invert, int &state, int moveSpeed, int s
 
 void loop()
 { 
-	thatShitWeNormallyDo();
+	hereBeDragons();
 }
 
 int invertServoPosition(int pos)
@@ -162,7 +167,7 @@ int invertServoPosition(int pos)
 	return abs(180 - pos);
 }
 
-void thatShitThatWeNormallyDo()
+void hereBeDragons()
 {
 	//mouth close, mouth open                  
 	jawCode(invertServoPosition(155) + 5, invertServoPosition(100));
