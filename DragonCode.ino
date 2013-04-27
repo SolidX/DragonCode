@@ -5,8 +5,8 @@
 //
 //Mouth Servo		-- Digital 6
 //Potentiometer		-- Analog  0
-//Eyes				-- Digital 7
-//Left Arm			-- Digital 12
+//Eyes				-- Digital 8
+//Left Arm			-- Digital 11
 //Left Hand			-- Digital 13
 //Right Arm			-- Digital 3
 //Right Hand		-- Digital 0
@@ -30,10 +30,15 @@ long counter;
 int stateOne = 0;
 int stateTwo = 0;
 int secondCounter = 0;
-int thirdCounter = 0;
-int armMoveUp = 160;		//douche code
-int armMoveDown = 120;
 
+//arm mins & maxes
+short leftArmMin = 20;
+short leftArmMax = 70;
+short rightArmMin = 60;
+short rightArmMax = 110;
+
+int laInnerCount = 0;
+int laStateCount = 0;
 int raInnerCount = 0;
 int raStateCount = 0;
 int rHInnerCount = 0;
@@ -46,11 +51,11 @@ const boolean debug = false;
 void setup() 
 {
 	//Head Stuff
-	eyes.attach(7);  
+	eyes.attach(8);  
 	mouthServo.attach(6);
 
 	//Arm Stuff
-	leftArm.attach(12);		//Left Arm Elbow
+	leftArm.attach(11);		//Left Arm Elbow
 //	leftHand.attach(13);	//Left Hand Fingers (180 is open, 90 is closed gripped)
 	rightArm.attach(3);		//Right Arm Elbow
 //	rightHand.attach(0);	//Right Hand FIngers (180 is open, 90 is closed gripped)
@@ -160,11 +165,42 @@ void movement(Servo &servoItem, boolean invert, int &state, int moveSpeed, int s
 void loop()
 { 
 	hereBeDragons();
+        //optometry();
 }
 
 int invertServoPosition(int pos)
 {
 	return abs(180 - pos);
+}
+
+void optometry()
+{
+  if (debug)
+  {
+    Serial.print("stateOne: ");
+    Serial.print("stateOne: ");
+    Serial.println(stateOne);
+    Serial.print("secondCounter: ");
+    Serial.println(secondCounter);
+  }
+  movement(eyes, false, stateOne, 10, 0, 43, secondCounter, 1000, 100, 10);
+  delay(400);
+}
+
+void testArm(Servo &arm, boolean invert)
+{
+  //movement(rightArm, false, raStateCount, 2, 20, 70, raInnerCount, 3000, 3000, 10);
+  //writeToServo(arm, 30, invert);
+  leftArm.write(30);
+  delay(2000);
+  //writeToServo(arm, 60, invert);
+  leftArm.write(60);
+  delay(2000);
+  //writeToServo(arm, 90, invert);
+  leftArm.write(90);
+  delay(2000);
+  //70 - 120
+  //void movement(Servo &servoItem, boolean invert, int &state, int moveSpeed, int startPos, int endPos, int &innerCounter, int timeDelay, int timeDelay2, int moveSpeedTwo)
 }
 
 void hereBeDragons()
@@ -173,20 +209,33 @@ void hereBeDragons()
 	jawCode(invertServoPosition(155) + 5, invertServoPosition(100));
 	
 	//Eyes
-	//movement(eyes, false, stateOne, 10, 0, 43, secondCounter, 1000, 100, 10);
+	movement(eyes, false, stateOne, 10, 0, 43, secondCounter, 1000, 100, 10);
 	
 	//Arms
-	//movement(leftArm, false, stateTwo, 2, armMoveDown, armMoveUp, thirdCounter, 3000, 3000, 10);
-	//movement(leftArm, false, stateTwo, 2, -60, 20, thirdCounter, 3000, 3000, 10);
-	movement(rightArm, false, raStateCount, 2, 20, 70, raInnerCount, 3000, 3000, 10);
+        if (debug)
+          Serial.println("Left Arm");
+	//Optimal operating range is 20 - 70
+        movement(leftArm, false, stateTwo, 2, leftArmMin, leftArmMax, laInnerCount, 3000, 3000, 10);
+        
+        if (debug)
+          Serial.println("Right Arm");
+        //Optimal operating range is 60 - 110
+        movement(rightArm, false, raStateCount, 2, rightArmMin, rightArmMax, raInnerCount, 3000, 3000, 10);
 
-	if(stateTwo == 0 && thirdCounter == 0)
+        //TODO: figure out why the left arm drops violently
+        //Randomized arm movements
+	if(stateTwo == 0 && laInnerCount == 0)
 	{
-		armMoveUp = random(55, 70);
-		armMoveDown = random(20, 35);
+		leftArmMin = random(15, 25);
+		leftArmMax = random(65, 75);
 	}
-
-	//Hands
+        if(raStateCount == 0 && raInnerCount == 0)
+	{
+		rightArmMin = random(55, 65);
+		rightArmMax = random(100, 110);
+	}
+	
+        //Hands
 	//TODO: Finish the hands.
 	//movement(leftHand, true, lHStateCount, 2, 90, 180, lHInnerCount, 3000, 3000, 10);
 	//movement(rightHand, true, rHStateCount, 2, 90, 180, rHInnerCount, 3000, 3000, 10);
