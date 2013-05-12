@@ -6,11 +6,11 @@
  * Mouth Servo		-- Digital 6
  * Potentiometer	-- Analog  0
  * Eyes				-- Digital 8
- * Left Arm			-- Digital 12
- * Left Hand		-- Digital 13
+ * Left Arm			-- Digital 11
+ * Left Hand		-- Digital 12
  * Right Arm		-- Digital 3
- * Right Hand		-- Digital 0
- * PIN 1 IS BROKEN !!!!!!!
+ * Right Hand		-- Digital 2
+ * PIN 0, 1 & 13 ARE BROKEN !!!!!!!
  */
 
 //Head Servos
@@ -25,7 +25,7 @@ Servo rightHand;
  
 short pos = 0;			//variable to store the servo position 
 const short potpin = 0;	//analog pin used to connect the potentiometer
-long counter;
+long counter = 0;
 
 int stateOne = 0;
 int stateTwo = 0;
@@ -55,13 +55,12 @@ void setup()
 	mouthServo.attach(6);
 
 	//Arm Stuff
-	leftArm.attach(12);		//Left Arm Elbow
-//	leftHand.attach(13);	//Left Hand Fingers (180 is open, 90 is closed gripped)
+	leftArm.attach(11);		//Left Arm Elbow
+	leftHand.attach(12);	//Left Hand Fingers (180 is open, 90 is closed gripped)
 	rightArm.attach(3);		//Right Arm Elbow
-//	rightHand.attach(0);	//Right Hand FIngers (180 is open, 90 is closed gripped)
-
-	counter = 0;
+	rightHand.attach(2);	//Right Hand FIngers (180 is open, 90 is closed gripped)
 	
+
 	if (debug)
 		Serial.begin(9600);
 } 
@@ -188,7 +187,6 @@ void optometry()
 
 void testArm(Servo &arm, boolean invert)
 {
-	//movement(rightArm, false, raStateCount, 2, 20, 70, raInnerCount, 3000, 3000, 10);
 	//writeToServo(arm, 30, invert);
 	leftArm.write(30);
 	delay(2000);
@@ -204,7 +202,8 @@ void testArm(Servo &arm, boolean invert)
 
 void hereBeDragons()
 {
-	//mouth close, mouth open         
+	//mouth close, mouth open
+	if (debug)	Serial.println("Jaw");
 	jawCode(invertServoPosition(155) + 5, invertServoPosition(100));
 	
 	//Eyes
@@ -213,30 +212,28 @@ void hereBeDragons()
 	//Arms
 	//Optimal operating range is 20 - 70
 	if (debug)	Serial.println("Left Arm");
-	movement(leftArm, false, stateTwo, 8, leftArmMin, leftArmMax, laInnerCount, 3000, 3000, 10);
+	movement(leftArm, false, stateTwo, 8, leftArmMin, leftArmMax, laInnerCount, 3000, 4000, 8);
         
-	
 	//Optimal operating range is 60 - 110
 	if (debug)	Serial.println("Right Arm");
-	movement(rightArm, false, raStateCount, 8, rightArmMin, rightArmMax, raInnerCount, 3000, 3000, 10);
+	movement(rightArm, false, raStateCount, 8, rightArmMin, rightArmMax, raInnerCount, 3000, 4000, 8);
 
 	//Randomized arm movements
 	if(stateTwo == 0 && laInnerCount == 0)
 	{
 		leftArmMin = random(10, 30);
-		leftArmMax = random(60, 80);
+		leftArmMax = random(60, 75);
 	}
 	
 	if(raStateCount == 0 && raInnerCount == 0)
 	{
 		rightArmMin = random(50, 70);
-		rightArmMax = random(95, 115);
+		rightArmMax = random(95, 11);
 	}
 	
 	//Hands
-	//TODO: Finish the hands.
 	movement(leftHand, false, lHStateCount, 2, 45, 135, lHInnerCount, 3000, 3000, 10);
-	movement(rightHand, false, rHStateCount, 2, 45, 135, rHInnerCount, 3000, 3000, 10);
+	movement(rightHand, true, rHStateCount, 2, 45, 135, rHInnerCount, 3000, 3000, 10);
 
 	delay(1);
 	counter++;
